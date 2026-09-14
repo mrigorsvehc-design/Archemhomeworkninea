@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Дневник 9а">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F4EEDF">
+<title>Дневник 9а</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4EEDF; --paper-raised:#FDFBF4; --ink:#2B2A26; --ink-soft:#75695A;
+    --line:#DED2B5; --rule:rgba(62,92,118,0.06); --pencil:#3E5C76; --pencil-soft:#E4EAF0;
+    --today:#C0463D; --done:#6B7A4E; --highlight:#F4D35E; --font-header:'Caveat',cursive;
+    --dock-height:64px; --shadow:rgba(0,0,0,0.05);
+  }
+  :root[data-theme="purple"]{
+    --paper:#EFE6F7; --paper-raised:#FBF7FE; --ink:#2E2140; --ink-soft:#7A6B93;
+    --line:#D9C7EC; --rule:rgba(108,79,161,0.07); --pencil:#6C4FA1; --pencil-soft:#EAE0F5;
+    --today:#B23A6B; --done:#5C8A6B; --highlight:#D8B4F8;
+  }
+  :root[data-theme="green"]{
+    --paper:#E7EFE1; --paper-raised:#F6FAF3; --ink:#20301F; --ink-soft:#5E7256;
+    --line:#C9DCC1; --rule:rgba(63,122,79,0.07); --pencil:#3F7A4F; --pencil-soft:#DCEEDF;
+    --today:#B4543D; --done:#2F6B3A; --highlight:#BFE3A0;
+  }
+  :root[data-theme="redblack"]{
+    --paper:#1B1414; --paper-raised:#241A1A; --ink:#F2E7E4; --ink-soft:#C79B93;
+    --line:#3B2626; --rule:rgba(217,79,79,0.08); --pencil:#D94F4F; --pencil-soft:#3A2020;
+    --today:#FF6B57; --done:#8FAE6E; --highlight:#E23B3B; --shadow:rgba(0,0,0,0.35);
+  }
+  :root[data-theme="classic"]{
+    --paper:#F2F2F5; --paper-raised:#FFFFFF; --ink:#1C1C1E; --ink-soft:#8E8E93;
+    --line:#E5E5EA; --rule:rgba(0,0,0,0.03); --pencil:#007AFF; --pencil-soft:#E8F0FE;
+    --today:#FF3B30; --done:#34C759; --highlight:#FFD60A; --font-header:-apple-system,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:#D8CFAF;font-family:'Source Sans 3',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  :root[data-theme="redblack"] html,:root[data-theme="redblack"] body{background:#0E0A0A;}
+  .app{
+    max-width:430px;margin:0 auto;min-height:100vh;position:relative;
+    background: repeating-linear-gradient(var(--rule) 0 1px, transparent 1px 34px), var(--paper);
+    display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,0,0,0.18);
+    --dock-height:64px;
+  }
+  .app.notebook-off{background:var(--paper);}
+  .app[data-nav="glass"]{--dock-height:92px;}
+  .spiral{position:absolute;left:0;top:0;bottom:0;width:22px;background-image:radial-gradient(circle at 11px 16px, #D8CFAF 5px, transparent 5.5px);background-size:100% 34px;background-repeat:repeat-y;z-index:5;}
+  .app.notebook-off .spiral{display:none;}
+
+  header{padding:26px 22px 16px 40px;border-bottom:2px solid var(--ink);position:relative;color:var(--ink);}
+  .app.notebook-off header{padding-left:20px;}
+  .eyebrow{font-size:13px;color:var(--ink-soft);font-weight:600;}
+  .title-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+  h1{font-family:var(--font-header);font-weight:700;font-size:38px;margin:0;line-height:1;color:var(--ink);}
+  .app.notebook-off h1{font-family:'Fraunces',serif;font-weight:600;font-size:27px;}
+  .header-btns{display:flex;gap:8px;flex-shrink:0;}
+  .icon-btn{width:30px;height:30px;border-radius:50%;border:2px solid var(--ink);background:var(--paper-raised);color:var(--ink);font-family:'Fraunces',serif;font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+  main{flex:1;padding:16px 16px 16px 40px;padding-bottom:calc(var(--dock-height) + 70px);overflow-y:auto;color:var(--ink);}
+  .app.notebook-off main{padding-left:20px;}
+
+  .now-banner{display:flex;align-items:center;gap:10px;background:var(--paper-raised);border:1.5px solid var(--line);border-radius:11px;padding:11px 13px;margin-bottom:14px;}
+  .now-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;background:var(--done);}
+  .now-dot.live{animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(107,122,78,0.5);}70%{box-shadow:0 0 0 7px rgba(107,122,78,0);}100%{box-shadow:0 0 0 0 rgba(107,122,78,0);}}
+  .now-text{font-size:13.5px;flex:1;}
+  .now-text b{font-weight:700;}
+  .now-sub{font-size:11.5px;color:var(--ink-soft);}
+
+  .day-tabs{display:flex;gap:5px;margin-bottom:16px;}
+  .day-tab{flex:1;text-align:center;padding:8px 2px 7px;border-radius:9px;cursor:pointer;user-select:none;background:var(--paper-raised);border:1.5px solid var(--line);}
+  .day-tab .dlabel{font-weight:700;font-size:13.5px;color:var(--ink-soft);}
+  .day-tab .ddate{font-size:10.5px;color:var(--ink-soft);opacity:0.75;}
+  .day-tab.active{background:var(--pencil);border-color:var(--pencil);}
+  .day-tab.active .dlabel,.day-tab.active .ddate{color:#fff;}
+  .day-tab.is-today:not(.active) .dlabel{color:var(--today);}
+  .day-tab.is-today:not(.active){box-shadow:inset 0 0 0 1.5px var(--today);}
+
+  .lesson{display:flex;align-items:center;gap:11px;padding:11px 8px;border-bottom:1px dashed var(--line);border-left:4px solid var(--subj,var(--pencil));border-radius:2px;margin-bottom:2px;background:var(--paper-raised);position:relative;}
+  .app.notebook-off .lesson{border-bottom:1px solid var(--line);}
+  .lesson.is-now{box-shadow:0 0 0 1.5px var(--done) inset;}
+  .lesson-num{width:24px;height:24px;border-radius:50%;background:var(--subj-soft,var(--pencil-soft));color:var(--subj,var(--pencil));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;flex-shrink:0;}
+  .lesson-main{flex:1;min-width:0;}
+  .lesson-subject{font-weight:600;font-size:15px;}
+  .lesson-room{font-size:12.5px;color:var(--ink-soft);}
+  .lesson-time{text-align:right;font-size:12px;color:var(--ink-soft);line-height:1.35;flex-shrink:0;}
+  .empty-note{text-align:center;color:var(--ink-soft);font-size:14px;padding:40px 20px;}
+
+  .stats-card{background:var(--paper-raised);border:1.5px solid var(--line);border-radius:11px;padding:13px 15px;margin-bottom:16px;}
+  .stats-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;}
+  .stats-title{font-family:'Fraunces',serif;font-size:14.5px;font-weight:600;}
+  .stats-num{font-size:12.5px;color:var(--ink-soft);}
+  .stats-bar{height:8px;border-radius:5px;background:var(--pencil-soft);overflow:hidden;}
+  .stats-bar-fill{height:100%;background:var(--done);border-radius:5px;transition:width .3s;}
+
+  .hw-day-title{font-family:'Fraunces',serif;font-size:15.5px;font-weight:600;margin:0 0 9px 4px;color:var(--ink);display:flex;align-items:baseline;gap:8px;}
+  .hw-day-title .ddate{font-size:12.5px;color:var(--ink-soft);font-weight:400;font-family:'Source Sans 3',sans-serif;}
+  .hw-day-title.is-today{color:var(--today);}
+  .hw-day-group{margin-bottom:20px;}
+
+  .swipe-wrap{position:relative;margin:0 0 12px 6px;border-radius:4px;overflow:hidden;}
+  .swipe-bg{position:absolute;inset:0;display:flex;align-items:center;font-weight:700;font-size:13px;color:#fff;opacity:0;}
+  .swipe-bg.right{background:var(--done);justify-content:flex-start;padding-left:18px;}
+  .swipe-bg.left{background:var(--today);justify-content:flex-end;padding-right:18px;}
+
+  .hw-card{background:var(--paper-raised);border:1.5px solid var(--line);border-radius:4px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;position:relative;box-shadow:2px 3px 0 var(--shadow);touch-action:pan-y;}
+  .swipe-wrap:nth-child(odd) .hw-card{transform:rotate(-0.5deg);}
+  .swipe-wrap:nth-child(even) .hw-card{transform:rotate(0.4deg);}
+  .app.notebook-off .swipe-wrap .hw-card{transform:none;box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+  .hw-card.done{opacity:0.5;}
+  .hw-check{width:21px;height:21px;border-radius:5px;border:2px solid var(--subj,var(--pencil));flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;}
+  .hw-card.done .hw-check{background:var(--done);border-color:var(--done);}
+  .hw-body{flex:1;min-width:0;}
+  .hw-subject{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.03em;color:var(--subj,var(--pencil));margin-bottom:3px;}
+  .hw-text{font-size:14.5px;line-height:1.42;word-wrap:break-word;color:var(--ink);}
+  .hw-card.done .hw-text{text-decoration:line-through;}
+  .hw-del{color:var(--ink-soft);font-size:17px;cursor:pointer;padding:2px 3px;flex-shrink:0;line-height:1;}
+  .hw-link{display:inline-block;margin-top:6px;font-size:12px;color:var(--pencil);text-decoration:underline;word-break:break-all;}
+  .hw-photo{margin-top:8px;max-height:100px;border-radius:7px;border:1px solid var(--line);cursor:pointer;display:block;}
+  .hw-date-pill{display:inline-block;margin-top:4px;font-size:10.5px;color:var(--ink-soft);background:var(--pencil-soft);padding:2px 7px;border-radius:999px;}
+
+  .add-panel{position:fixed;left:50%;transform:translateX(-50%);bottom:var(--dock-height);width:100%;max-width:430px;background:var(--paper-raised);border-top:2px solid var(--ink);padding:10px 14px 12px 14px;display:none;color:var(--ink);}
+  .add-panel.open{display:block;}
+  .add-row{display:flex;gap:7px;margin-bottom:6px;}
+  .add-row input{border:1.5px solid var(--line);background:var(--paper);border-radius:8px;padding:9px 10px;font-size:14px;font-family:inherit;color:var(--ink);}
+  #hwCode{width:60px;text-transform:lowercase;}
+  #hwText{flex:1;min-width:0;}
+  .add-row button{border:none;background:var(--ink);color:var(--paper);border-radius:8px;padding:0 14px;font-weight:600;font-size:14px;cursor:pointer;flex-shrink:0;}
+  .mini-toggles{display:flex;gap:7px;margin-bottom:6px;}
+  .attach-toggle{background:none;border:1.5px dashed var(--line);border-radius:8px;padding:7px 10px;font-size:12px;color:var(--ink-soft);cursor:pointer;font-family:inherit;flex:1;}
+  .attach-toggle.on{border-style:solid;border-color:var(--pencil);color:var(--pencil);}
+  .attach-panel{display:none;gap:7px;margin-bottom:6px;flex-direction:column;}
+  .attach-panel.open{display:flex;}
+  .attach-panel input[type=text],.attach-panel input[type=date]{border:1.5px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;color:var(--ink);}
+  .attach-panel .photo-row{display:flex;align-items:center;gap:8px;}
+  .attach-panel label.photo-btn{background:var(--pencil-soft);color:var(--pencil);border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .attach-panel input[type=file]{display:none;}
+  .photo-preview{height:34px;border-radius:6px;}
+  .date-hint{font-size:11px;color:var(--ink-soft);}
+  .add-hint{font-size:11px;color:var(--ink-soft);display:flex;justify-content:space-between;align-items:center;}
+  .add-hint button{background:none;border:none;color:var(--pencil);font-weight:700;font-size:11px;cursor:pointer;padding:0;text-decoration:underline;}
+  .add-error{font-size:12px;color:var(--today);margin-top:2px;min-height:14px;}
+
+  .fab{position:fixed;left:50%;transform:translateX(-50%) rotate(-1deg);bottom:calc(var(--dock-height) + 68px);max-width:430px;width:calc(100% - 32px);background:var(--highlight);color:var(--ink);border:2px solid var(--ink);border-radius:9px;padding:11px;font-size:14.5px;font-weight:700;cursor:pointer;display:none;box-shadow:2px 3px 0 rgba(0,0,0,0.15);}
+  .app.notebook-off .fab{transform:translateX(-50%);}
+  .fab.show{display:block;}
+
+  nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:430px;background:var(--paper-raised);border-top:2px solid var(--ink);display:flex;padding:8px 0 max(8px, env(safe-area-inset-bottom));}
+  .nav-btn{flex:1;text-align:center;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--ink-soft);cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;padding:4px 0;}
+  .nav-btn.active{color:var(--pencil);}
+  .nav-icon{font-size:18px;}
+  .app[data-nav="glass"] nav{
+    left:50%;transform:translateX(-50%);bottom:16px;width:auto;border-radius:999px;
+    background:rgba(255,255,255,0.5);backdrop-filter:blur(18px) saturate(180%);-webkit-backdrop-filter:blur(18px) saturate(180%);
+    border:1px solid rgba(255,255,255,0.4);box-shadow:0 10px 30px rgba(0,0,0,0.2);padding:12px 26px;gap:30px;
+  }
+  :root[data-theme="redblack"] .app[data-nav="glass"] nav{background:rgba(40,25,25,0.55);border-color:rgba(255,255,255,0.12);}
+  .app[data-nav="glass"] .nav-btn{flex:none;color:var(--ink-soft);}
+  .app[data-nav="glass"] .nav-btn.active{color:var(--pencil);}
+  .app[data-nav="glass"] .nav-icon{font-size:23px;}
+  .app[data-nav="glass"] .nav-btn span:last-child{display:none;}
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .modal-backdrop{position:fixed;inset:0;background:rgba(30,28,22,0.45);display:none;align-items:flex-end;justify-content:center;z-index:50;}
+  .modal-backdrop.open{display:flex;}
+  .modal-sheet{width:100%;max-width:430px;max-height:80vh;overflow-y:auto;background:var(--paper-raised);border-radius:18px 18px 0 0;border:2px solid var(--ink);border-bottom:none;padding:18px 20px 26px;color:var(--ink);}
+  .modal-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin:0 0 4px;}
+  .modal-sub{font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;}
+  .code-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .code-item{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;}
+  .code-dot{width:9px;height:9px;border-radius:50%;background:var(--subj);flex-shrink:0;}
+  .code-code{font-weight:700;font-size:13.5px;color:var(--subj);}
+  .code-name{font-size:12px;color:var(--ink-soft);}
+  .modal-close{margin-top:16px;width:100%;border:2px solid var(--ink);background:var(--ink);color:var(--paper);border-radius:9px;padding:11px;font-weight:700;font-size:14px;cursor:pointer;}
+
+  .img-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:60;padding:20px;}
+  .img-modal-backdrop.open{display:flex;}
+  .img-modal-backdrop img{max-width:100%;max-height:100%;border-radius:8px;}
+
+  .settings-section{margin-bottom:20px;}
+  .settings-label{font-family:'Fraunces',serif;font-weight:600;font-size:14px;margin-bottom:9px;}
+  .theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .theme-swatch{border:2px solid var(--line);border-radius:11px;padding:10px 4px;text-align:center;cursor:pointer;font-size:11px;font-weight:600;color:var(--ink);background:var(--paper);}
+  .theme-swatch.active{border-color:var(--pencil);box-shadow:0 0 0 1px var(--pencil);}
+  .theme-dot{width:20px;height:20px;border-radius:50%;margin:0 auto 6px;border:1px solid rgba(0,0,0,0.1);}
+  .switch-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);}
+  .switch-row:last-child{border-bottom:none;}
+  .switch-row-label{font-size:14px;}
+  .switch{position:relative;width:44px;height:26px;flex-shrink:0;display:block;}
+  .switch input{opacity:0;width:0;height:0;position:absolute;}
+  .switch .track{position:absolute;inset:0;background:var(--line);border-radius:999px;transition:.2s;cursor:pointer;}
+  .switch .track .knob{position:absolute;top:2px;left:2px;width:22px;height:22px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);}
+  .switch input:checked + .track{background:var(--pencil);}
+  .switch input:checked + .track .knob{transform:translateX(18px);}
+  .nav-style-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .nav-style-card{border:2px solid var(--line);border-radius:11px;padding:12px 8px;text-align:center;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink);background:var(--paper);}
+  .nav-style-card.active{border-color:var(--pencil);box-shadow:0 0 0 1px var(--pencil);}
+  .nav-style-preview{height:20px;margin:0 auto 8px;background:var(--paper-raised);border:1px solid var(--line);}
+  .nav-style-preview.bar{width:80%;border-radius:4px;}
+  .nav-style-preview.glass{width:50%;border-radius:999px;}
+</style>
+</head>
+<body>
+<div class="app" id="appRoot">
+  <div class="spiral"></div>
+  <header>
+    <div class="eyebrow" id="dateLine">—</div>
+    <div class="title-row">
+      <h1 id="viewTitle">Расписание</h1>
+      <div class="header-btns">
+        <button class="icon-btn" id="settingsBtn">⚙</button>
+        <button class="icon-btn" id="infoBtn">i</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="view active" id="view-schedule">
+      <div id="nowBanner"></div>
+      <div class="day-tabs" id="dayTabsSchedule"></div>
+      <div id="lessonList"></div>
+    </div>
+    <div class="view" id="view-hw">
+      <div id="statsCard"></div>
+      <div id="hwList"></div>
+    </div>
+  </main>
+
+  <button class="fab" id="addToggle">+ Добавить ДЗ</button>
+  <div class="add-panel" id="addPanel">
+    <div class="add-row">
+      <input id="hwCode" placeholder="код" maxlength="5">
+      <input id="hwText" placeholder="что задали">
+      <button id="hwSubmit">Ок</button>
+    </div>
+    <div class="mini-toggles">
+      <button class="attach-toggle" id="attachToggle">📎 фото / ссылка</button>
+      <button class="attach-toggle" id="dateToggle">📅 дата</button>
+    </div>
+    <div class="attach-panel" id="attachPanel">
+      <input type="text" id="hwLink" placeholder="ссылка (необязательно)">
+      <div class="photo-row">
+        <label class="photo-btn" for="hwPhoto">📷 выбрать фото</label>
+        <input type="file" id="hwPhoto" accept="image/*">
+        <img id="photoPreview" class="photo-preview" style="display:none">
+      </div>
+    </div>
+    <div class="attach-panel" id="datePanel">
+      <input type="date" id="hwDate">
+      <div class="date-hint">Пусто — уйдёт на ближайший урок этого предмета автоматически</div>
+    </div>
+    <div class="add-hint"><span>Не помнишь код?</span><button id="hintCodesBtn">список кодов</button></div>
+    <div class="add-error" id="hwError"></div>
+  </div>
+
+  <nav>
+    <button class="nav-btn active" data-view="schedule"><span class="nav-icon">🔔</span><span>Расписание</span></button>
+    <button class="nav-btn" data-view="hw"><span class="nav-icon">✏️</span><span>ДЗ</span></button>
+  </nav>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-sheet">
+    <div class="modal-title">Коды предметов</div>
+    <div class="modal-sub">Пиши код в поле «код» при добавлении ДЗ — уйдёт на ближайший подходящий урок</div>
+    <div class="code-grid" id="codeGrid"></div>
+    <button class="modal-close" id="modalClose">Понятно</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="settingsBackdrop">
+  <div class="modal-sheet">
+    <div class="modal-title">Настройки</div>
+    <div class="modal-sub">Меняются сразу и сохраняются на телефоне</div>
+
+    <div class="settings-section">
+      <div class="settings-label">Оформление</div>
+      <div class="theme-grid" id="themeGrid">
+        <div class="theme-swatch" data-theme="current"><div class="theme-dot" style="background:#3E5C76"></div>Как сейчас</div>
+        <div class="theme-swatch" data-theme="purple"><div class="theme-dot" style="background:#6C4FA1"></div>Фиолетовый</div>
+        <div class="theme-swatch" data-theme="green"><div class="theme-dot" style="background:#3F7A4F"></div>Зелёный</div>
+        <div class="theme-swatch" data-theme="redblack"><div class="theme-dot" style="background:#D94F4F;border-color:#000"></div>Чёрно-красный</div>
+        <div class="theme-swatch" data-theme="classic"><div class="theme-dot" style="background:#007AFF"></div>Классика</div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-label">Нижняя панель</div>
+      <div class="nav-style-grid" id="navGrid">
+        <div class="nav-style-card" data-nav="bar"><div class="nav-style-preview bar"></div>Как сейчас</div>
+        <div class="nav-style-card" data-nav="glass"><div class="nav-style-preview glass"></div>Жидкое стекло</div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="switch-row">
+        <div class="switch-row-label">Блокнотный стиль (спираль, линии)</div>
+        <label class="switch"><input type="checkbox" id="toggleNotebook"><span class="track"><span class="knob"></span></span></label>
+      </div>
+      <div class="switch-row">
+        <div class="switch-row-label">Звуки кнопок</div>
+        <label class="switch"><input type="checkbox" id="toggleSounds"><span class="track"><span class="knob"></span></span></label>
+      </div>
+    </div>
+
+    <button class="modal-close" id="settingsClose">Готово</button>
+  </div>
+</div>
+
+<div class="img-modal-backdrop" id="imgModalBackdrop"><img id="imgModalImg" src=""></div>
+
+<script>
+const DAYS = ['Понедельник','Вторник','Среда','Четверг','Пятница'];
+const DAYS_SHORT = ['Пн','Вт','Ср','Чт','Пт'];
+const MONTHS_SHORT = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+
+const BELLS_MON = {0:['08.00','08.30'],1:['08.40','09.15'],2:['09.25','10.00'],3:['10.15','10.50'],4:['11.05','11.40'],5:['11.50','12.25'],6:['12.30','13.05'],7:['13.10','13.45']};
+const BELLS_REST = {0:['08.00','08.40'],1:['08.50','09.30'],2:['09.40','10.20'],3:['10.35','11.15'],4:['11.30','12.10'],5:['12.20','13.00'],6:['13.10','13.50'],7:['13.55','14.35']};
+function bellsForDay(dayIdx){ return dayIdx===0 ? BELLS_MON : BELLS_REST; }
+
+const SUBJ_COLORS = {
+  алг:'#3E5C76', геом:'#3E5C76', рус:'#8B4049', лит:'#8B4049', ист:'#6B7A4E', общ:'#6B7A4E',
+  физи:'#2E7D6B', хим:'#2E7D6B', био:'#2E7D6B', физр:'#C97A3E', вис:'#C97A3E',
+  инф:'#6C5B8C', англ:'#6C5B8C', геог:'#8A6A45', обз:'#5C6670', тех:'#5C6670', клч:'#A6763F'
+};
+function softColor(hex){ return hex + '1E'; }
+
+const SCHEDULE = [
+  [ {num:0, subject:'Классный час', room:'26', code:'клч'}, {num:1, subject:'Физ-ра', room:'', code:'физр'}, {num:2, subject:'Русский', room:'38', code:'рус'}, {num:3, subject:'История', room:'31', code:'ист'}, {num:4, subject:'Физика', room:'29', code:'физи'}, {num:5, subject:'Биология', room:'11', code:'био'}, {num:6, subject:'Алгебра', room:'26', code:'алг'} ],
+  [ {num:1, subject:'Алгебра', room:'26', code:'алг'}, {num:2, subject:'Инф/англ', room:'37', code:'инф'}, {num:3, subject:'Химия', room:'32', code:'хим'}, {num:4, subject:'Геометрия', room:'26', code:'геом'}, {num:5, subject:'Литература', room:'38', code:'лит'}, {num:6, subject:'Обществознание', room:'31', code:'общ'}, {num:7, subject:'География', room:'21', code:'геог'} ],
+  [ {num:1, subject:'Физ-ра', room:'', code:'физр'}, {num:2, subject:'Физика', room:'29', code:'физи'}, {num:3, subject:'Биология', room:'11', code:'био'}, {num:4, subject:'Литература', room:'38', code:'лит'}, {num:5, subject:'Английский', room:'27/37', code:'англ'}, {num:6, subject:'История', room:'31', code:'ист'}, {num:7, subject:'ОБЗР', room:'маст.', code:'обз'} ],
+  [ {num:1, subject:'Геометрия', room:'26', code:'геом'}, {num:2, subject:'Русский', room:'38', code:'рус'}, {num:3, subject:'Алгебра', room:'26', code:'алг'}, {num:4, subject:'Физика', room:'29', code:'физи'}, {num:5, subject:'Русский', room:'38', code:'рус'}, {num:6, subject:'Английский', room:'27/37', code:'англ'}, {num:7, subject:'Технология', room:'48', code:'тех'} ],
+  [ {num:1, subject:'Химия', room:'32', code:'хим'}, {num:2, subject:'Алгебра', room:'26', code:'алг'}, {num:3, subject:'Литература', room:'38', code:'лит'}, {num:4, subject:'География', room:'21', code:'геог'}, {num:5, subject:'ВиС', room:'26', code:'вис'}, {num:6, subject:'Инф/англ', room:'27', code:'инф'} ],
+];
+
+const CODE_TO_NAME = {
+  алг:'Алгебра', рус:'Русский', ист:'История', био:'Биология', физр:'Физ-ра', физи:'Физика',
+  инф:'Инф/англ', хим:'Химия', геом:'Геометрия', лит:'Литература', общ:'Обществознание',
+  геог:'География', англ:'Английский', обз:'ОБЗР', тех:'Технология', вис:'ВиС', клч:'Классный час'
+};
+
+let selectedScheduleDay = 0;
+let homework = [];
+let currentView = 'schedule';
+let pendingPhoto = null;
+let settings = { theme:'current', notebook:true, sounds:true, nav:'bar' };
+let audioCtx = null;
+
+function playClick(){
+  if(!settings.sounds) return;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+    o.type='sine'; o.frequency.value=720;
+    g.gain.setValueAtTime(0.08, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+0.09);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime+0.1);
+  }catch(e){}
+}
+
+function monthGenitive(m){ return ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'][m]; }
+function isoDate(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function sameDate(a,b){ return isoDate(a)===isoDate(b); }
+function realTodayIdx(){ const d=new Date().getDay(); return d===0||d===6?-1:d-1; }
+function getDisplayMonday(){
+  const now=new Date(); now.setHours(0,0,0,0);
+  const dow=now.getDay();
+  if(dow===0){ now.setDate(now.getDate()+1); }
+  else if(dow===6){ now.setDate(now.getDate()+2); }
+  else { now.setDate(now.getDate()-(dow-1)); }
+  return now;
+}
+function timeToMin(t){ const [h,m]=t.split('.').map(Number); return h*60+m; }
+function minToTime(mn){ const h=Math.floor(mn/60), m=mn%60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
+
+// ---------- настройки ----------
+function loadSettings(){
+  try{ const raw = localStorage.getItem('appSettings'); if(raw) settings = Object.assign(settings, JSON.parse(raw)); }catch(e){}
+}
+function saveSettings(){ try{ localStorage.setItem('appSettings', JSON.stringify(settings)); }catch(e){} }
+function applySettings(){
+  document.documentElement.setAttribute('data-theme', settings.theme);
+  const app = document.getElementById('appRoot');
+  app.classList.toggle('notebook-off', !settings.notebook);
+  app.setAttribute('data-nav', settings.nav);
+  document.querySelectorAll('.theme-swatch').forEach(el=>el.classList.toggle('active', el.getAttribute('data-theme')===settings.theme));
+  document.querySelectorAll('.nav-style-card').forEach(el=>el.classList.toggle('active', el.getAttribute('data-nav')===settings.nav));
+  document.getElementById('toggleNotebook').checked = settings.notebook;
+  document.getElementById('toggleSounds').checked = settings.sounds;
+}
+document.querySelectorAll('.theme-swatch').forEach(el=>{
+  el.onclick = ()=>{ settings.theme = el.getAttribute('data-theme'); saveSettings(); applySettings(); playClick(); };
+});
+document.querySelectorAll('.nav-style-card').forEach(el=>{
+  el.onclick = ()=>{ settings.nav = el.getAttribute('data-nav'); saveSettings(); applySettings(); playClick(); };
+});
+document.getElementById('toggleNotebook').onchange = (e)=>{ settings.notebook = e.target.checked; saveSettings(); applySettings(); playClick(); };
+document.getElementById('toggleSounds').onchange = (e)=>{ settings.sounds = e.target.checked; saveSettings(); if(settings.sounds) playClick(); };
+document.getElementById('settingsBtn').onclick = ()=>{ document.getElementById('settingsBackdrop').classList.add('open'); playClick(); };
+document.getElementById('settingsClose').onclick = ()=>{ document.getElementById('settingsBackdrop').classList.remove('open'); playClick(); };
+document.getElementById('settingsBackdrop').onclick = (e)=>{ if(e.target.id==='settingsBackdrop') e.currentTarget.classList.remove('open'); };
+
+// ---------- шапка / баннер / расписание ----------
+function renderHeader(){
+  const now = new Date();
+  const t = realTodayIdx();
+  document.getElementById('dateLine').textContent = (t>=0 ? DAYS[t] : 'Выходные') + ' · ' + now.getDate() + ' ' + monthGenitive(now.getMonth());
+  document.getElementById('viewTitle').textContent = currentView==='schedule' ? 'Расписание' : 'Домашка';
+}
+
+function renderNowBanner(){
+  const box = document.getElementById('nowBanner');
+  const t = realTodayIdx();
+  if(t<0){ box.innerHTML=''; return; }
+  const now = new Date();
+  const nowMin = now.getHours()*60+now.getMinutes();
+  const lessons = SCHEDULE[t];
+  const bells = bellsForDay(t);
+  let current=null, next=null;
+  for(const l of lessons){
+    const b = bells[l.num]; if(!b) continue;
+    const s=timeToMin(b[0]), e=timeToMin(b[1]);
+    if(nowMin>=s && nowMin<e){ current={l,s,e}; break; }
+    if(nowMin<s && (!next || s<timeToMin(bells[next.l.num][0]))){ next={l,s,e}; }
+  }
+  let html='';
+  if(current){
+    html = `<div class="now-banner"><div class="now-dot live"></div><div class="now-text"><b>Сейчас: ${current.l.subject}</b><div class="now-sub">до звонка ${current.e-nowMin} мин · закончится в ${minToTime(current.e)}</div></div></div>`;
+  } else if(next){
+    html = `<div class="now-banner"><div class="now-dot"></div><div class="now-text"><b>Перемена</b><div class="now-sub">дальше ${next.l.subject} в ${minToTime(next.s)}, через ${next.s-nowMin} мин</div></div></div>`;
+  } else if(lessons.length){
+    if(nowMin<timeToMin((bells[lessons[0].num]||['0','0'])[0])){
+      html = `<div class="now-banner"><div class="now-dot"></div><div class="now-text"><b>Уроки ещё не начались</b><div class="now-sub">первый урок в ${bells[lessons[0].num][0].replace('.',':')}</div></div></div>`;
+    } else {
+      html = `<div class="now-banner"><div class="now-dot"></div><div class="now-text"><b>Уроки на сегодня закончились</b></div></div>`;
+    }
+  }
+  box.innerHTML = html;
+}
+
+function renderDayTabs(){
+  const wrap = document.getElementById('dayTabsSchedule');
+  wrap.innerHTML='';
+  const t = realTodayIdx();
+  const monday = getDisplayMonday();
+  DAYS_SHORT.forEach((label,i)=>{
+    const dd = new Date(monday); dd.setDate(monday.getDate()+i);
+    const btn = document.createElement('div');
+    btn.className='day-tab'+(i===selectedScheduleDay?' active':'')+(i===t?' is-today':'');
+    btn.innerHTML = `<div class="dlabel">${label}</div><div class="ddate">${dd.getDate()} ${MONTHS_SHORT[dd.getMonth()]}</div>`;
+    btn.onclick=()=>{ selectedScheduleDay=i; playClick(); renderSchedule(); };
+    wrap.appendChild(btn);
+  });
+}
+
+function renderSchedule(){
+  renderNowBanner();
+  renderDayTabs();
+  const list = document.getElementById('lessonList');
+  const lessons = SCHEDULE[selectedScheduleDay];
+  const bells = bellsForDay(selectedScheduleDay);
+  const t = realTodayIdx();
+  const now = new Date(); const nowMin = now.getHours()*60+now.getMinutes();
+  if(!lessons.length){ list.innerHTML='<div class="empty-note">Уроков нет</div>'; return; }
+  list.innerHTML = lessons.map(l=>{
+    const b = bells[l.num]||['',''];
+    const c = SUBJ_COLORS[l.code]||'#3E5C76';
+    const isNow = (selectedScheduleDay===t) && nowMin>=timeToMin(b[0]) && nowMin<timeToMin(b[1]);
+    return `<div class="lesson ${isNow?'is-now':''}" style="--subj:${c};--subj-soft:${softColor(c)}">
+      <div class="lesson-num">${l.num}</div>
+      <div class="lesson-main"><div class="lesson-subject">${l.subject}</div><div class="lesson-room">${l.room?'каб. '+l.room:''}</div></div>
+      <div class="lesson-time">${b[0]}<br>${b[1]}</div>
+    </div>`;
+  }).join('');
+}
+
+function findNearestSlot(code){
+  const now = new Date();
+  const nowMin = now.getHours()*60+now.getMinutes();
+  let cursor = new Date(now); cursor.setHours(0,0,0,0);
+  for(let step=0; step<12; step++){
+    const dow = cursor.getDay();
+    if(dow>=1 && dow<=5){
+      const dayIdx = dow-1;
+      const lessons = SCHEDULE[dayIdx].filter(l=>l.code===code);
+      if(lessons.length){
+        const bells = bellsForDay(dayIdx);
+        const isToday = sameDate(cursor, now);
+        for(const l of lessons){
+          if(isToday){
+            const startMin = timeToMin((bells[l.num]||['00.00'])[0]);
+            if(startMin<=nowMin) continue;
+          }
+          return {dayIdx, num:l.num, date:new Date(cursor)};
+        }
+      }
+    }
+    cursor.setDate(cursor.getDate()+1);
+  }
+  return null;
+}
+
+function findSlotForDate(code, dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  const dow = d.getDay();
+  const dayIdx = (dow>=1 && dow<=5) ? dow-1 : -1;
+  let num = 0;
+  if(dayIdx>=0){
+    const lessons = SCHEDULE[dayIdx].filter(l=>l.code===code);
+    if(lessons.length) num = lessons[0].num;
+  }
+  return { dayIdx, num, date:d };
+}
+
+// ---------- ДЗ: хранение ----------
+async function loadHomework(){
+  try{ const raw = localStorage.getItem('homework'); homework = raw ? JSON.parse(raw) : []; }
+  catch(e){ homework=[]; }
+}
+async function saveHomework(){ try{ localStorage.setItem('homework', JSON.stringify(homework)); }catch(e){} }
+
+function renderStats(){
+  const box = document.getElementById('statsCard');
+  const monday = getDisplayMonday();
+  const friday = new Date(monday); friday.setDate(monday.getDate()+4);
+  const inWeek = homework.filter(h=>{ const d=new Date(h.date+'T00:00:00'); return d>=monday && d<=friday; });
+  if(!inWeek.length){ box.innerHTML=''; return; }
+  const done = inWeek.filter(h=>h.done).length;
+  const pct = Math.round(done/inWeek.length*100);
+  box.innerHTML = `<div class="stats-card">
+    <div class="stats-top"><div class="stats-title">На этой неделе</div><div class="stats-num">${done} из ${inWeek.length}</div></div>
+    <div class="stats-bar"><div class="stats-bar-fill" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+function renderHomework(){
+  renderStats();
+  const list = document.getElementById('hwList');
+  if(!homework.length){ list.innerHTML='<div class="empty-note">Пока ничего не задано.<br>Нажми «+ Добавить ДЗ» внизу.</div>'; return; }
+  const todayIso = isoDate(new Date());
+  const byDate = {};
+  homework.forEach(h=>{ (byDate[h.date]=byDate[h.date]||[]).push(h); });
+  const order = Object.keys(byDate).sort();
+  list.innerHTML = order.map(dateIso=>{
+    const items = byDate[dateIso].sort((a,b)=>a.num-b.num);
+    const d = new Date(dateIso+'T00:00:00');
+    const wd = (d.getDay()+6)%7;
+    const dayLabel = wd<5 ? DAYS[wd] : (d.getDay()===0?'Воскресенье':'Суббота');
+    const cards = items.map(h=>{
+      const c = SUBJ_COLORS[h.code]||'#3E5C76';
+      const link = h.link ? `<a class="hw-link" href="${h.link}" target="_blank" rel="noopener">${h.link}</a>` : '';
+      const photo = h.photo ? `<img class="hw-photo" src="${h.photo}" data-imgview="${h.id}">` : '';
+      return `<div class="swipe-wrap" data-id="${h.id}">
+        <div class="swipe-bg right">✓ Готово</div>
+        <div class="swipe-bg left">✕ Удалить</div>
+        <div class="hw-card ${h.done?'done':''}" style="--subj:${c}" data-cardid="${h.id}">
+          <div class="hw-check" data-toggle="${h.id}">${h.done?'✓':''}</div>
+          <div class="hw-body">
+            <div class="hw-subject">${CODE_TO_NAME[h.code]||h.code}${h.num?' · урок '+h.num:''}</div>
+            <div class="hw-text">${escapeHtml(h.text)}</div>
+            ${link}${photo}
+          </div>
+          <div class="hw-del" data-del="${h.id}">✕</div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="hw-day-group"><div class="hw-day-title ${dateIso===todayIso?'is-today':''}">${dayLabel} <span class="ddate">${d.getDate()} ${monthGenitive(d.getMonth())}</span></div>${cards}</div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-toggle]').forEach(el=>{
+    el.onclick=()=>{ const id=el.getAttribute('data-toggle'); const h=homework.find(x=>x.id===id); if(h){ h.done=!h.done; saveHomework(); playClick(); renderHomework(); } };
+  });
+  list.querySelectorAll('[data-del]').forEach(el=>{
+    el.onclick=()=>{ const id=el.getAttribute('data-del'); homework=homework.filter(x=>x.id!==id); saveHomework(); playClick(); renderHomework(); };
+  });
+  list.querySelectorAll('[data-imgview]').forEach(el=>{
+    el.onclick=()=>{ document.getElementById('imgModalImg').src = el.src; document.getElementById('imgModalBackdrop').classList.add('open'); };
+  });
+  attachSwipeHandlers();
+}
+
+function attachSwipeHandlers(){
+  document.querySelectorAll('.swipe-wrap').forEach(wrap=>{
+    const card = wrap.querySelector('.hw-card');
+    const bgRight = wrap.querySelector('.swipe-bg.right');
+    const bgLeft = wrap.querySelector('.swipe-bg.left');
+    let startX=0, dx=0, dragging=false;
+    const THRESH=78;
+    function down(x){ dragging=true; startX=x; card.style.transition='none'; }
+    function move(x){
+      if(!dragging) return;
+      dx = x-startX; dx = Math.max(-140, Math.min(140, dx));
+      card.style.transform = `translateX(${dx}px)`;
+      bgRight.style.opacity = dx>10 ? Math.min(1, dx/THRESH) : 0;
+      bgLeft.style.opacity = dx<-10 ? Math.min(1, -dx/THRESH) : 0;
+    }
+    function up(){
+      if(!dragging) return;
+      dragging=false; card.style.transition='transform .18s ease';
+      const id = wrap.getAttribute('data-id');
+      if(dx>THRESH){
+        const h = homework.find(x=>x.id===id); if(h){ h.done=true; saveHomework(); }
+        playClick();
+        card.style.transform='translateX(140px)'; card.style.opacity='0';
+        setTimeout(renderHomework, 150);
+      } else if(dx<-THRESH){
+        homework = homework.filter(x=>x.id!==id); saveHomework(); playClick();
+        card.style.transform='translateX(-140px)'; card.style.opacity='0';
+        setTimeout(renderHomework, 150);
+      } else {
+        card.style.transform='translateX(0)'; bgRight.style.opacity=0; bgLeft.style.opacity=0;
+      }
+      dx=0;
+    }
+    card.addEventListener('touchstart', e=>down(e.touches[0].clientX), {passive:true});
+    card.addEventListener('touchmove', e=>move(e.touches[0].clientX), {passive:true});
+    card.addEventListener('touchend', up);
+    card.addEventListener('pointerdown', e=>{ if(e.pointerType==='mouse'){ down(e.clientX); card.setPointerCapture(e.pointerId);} });
+    card.addEventListener('pointermove', e=>{ if(e.pointerType==='mouse') move(e.clientX); });
+    card.addEventListener('pointerup', e=>{ if(e.pointerType==='mouse') up(); });
+  });
+}
+
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+function setView(v){
+  currentView=v;
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.toggle('active', el.getAttribute('data-view')===v));
+  document.getElementById('addToggle').classList.toggle('show', v==='hw');
+  if(v!=='hw'){ document.getElementById('addPanel').classList.remove('open'); }
+  renderHeader();
+}
+document.querySelectorAll('.nav-btn').forEach(btn=>{ btn.onclick=()=>{ playClick(); setView(btn.getAttribute('data-view')); }; });
+document.getElementById('addToggle').onclick=()=>{ document.getElementById('addPanel').classList.toggle('open'); playClick(); };
+document.getElementById('attachToggle').onclick=()=>{
+  document.getElementById('attachPanel').classList.toggle('open');
+  document.getElementById('attachToggle').classList.toggle('on');
+  playClick();
+};
+document.getElementById('dateToggle').onclick=()=>{
+  document.getElementById('datePanel').classList.toggle('open');
+  document.getElementById('dateToggle').classList.toggle('on');
+  playClick();
+};
+
+function openCodeModal(){
+  const grid = document.getElementById('codeGrid');
+  grid.innerHTML = Object.keys(CODE_TO_NAME).map(code=>{
+    const c = SUBJ_COLORS[code]||'#3E5C76';
+    return `<div class="code-item" style="--subj:${c}"><div class="code-dot"></div><div><div class="code-code">${code}</div><div class="code-name">${CODE_TO_NAME[code]}</div></div></div>`;
+  }).join('');
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+document.getElementById('infoBtn').onclick=()=>{ openCodeModal(); playClick(); };
+document.getElementById('hintCodesBtn').onclick=openCodeModal;
+document.getElementById('modalClose').onclick=()=>{ document.getElementById('modalBackdrop').classList.remove('open'); playClick(); };
+document.getElementById('modalBackdrop').onclick=(e)=>{ if(e.target.id==='modalBackdrop') e.currentTarget.classList.remove('open'); };
+document.getElementById('imgModalBackdrop').onclick=()=>document.getElementById('imgModalBackdrop').classList.remove('open');
+
+document.getElementById('hwPhoto').onchange = (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    pendingPhoto = reader.result;
+    const prev = document.getElementById('photoPreview');
+    prev.src = pendingPhoto; prev.style.display='inline-block';
+  };
+  reader.readAsDataURL(file);
+};
+
+document.getElementById('hwSubmit').onclick = async ()=>{
+  const codeInput = document.getElementById('hwCode');
+  const textInput = document.getElementById('hwText');
+  const linkInput = document.getElementById('hwLink');
+  const dateInput = document.getElementById('hwDate');
+  const errBox = document.getElementById('hwError');
+  const code = codeInput.value.trim().toLowerCase();
+  const text = textInput.value.trim();
+  const link = linkInput.value.trim();
+  const dateVal = dateInput.value;
+  errBox.textContent='';
+  if(!code || !CODE_TO_NAME[code]){ errBox.textContent='Не знаю такой код — глянь список кодов.'; return; }
+  if(!text){ errBox.textContent='Напиши, что задали.'; return; }
+  const slot = dateVal ? findSlotForDate(code, dateVal) : findNearestSlot(code);
+  if(!slot){ errBox.textContent='Этого предмета нет в расписании.'; return; }
+  const entry = {
+    id: Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+    date: isoDate(slot.date), dayIdx: slot.dayIdx, num: slot.num,
+    code, text, done:false
+  };
+  if(link) entry.link = link;
+  if(pendingPhoto) entry.photo = pendingPhoto;
+  homework.push(entry);
+  await saveHomework();
+  playClick();
+  codeInput.value=''; textInput.value=''; linkInput.value=''; dateInput.value='';
+  pendingPhoto=null;
+  document.getElementById('photoPreview').style.display='none';
+  document.getElementById('hwPhoto').value='';
+  document.getElementById('attachPanel').classList.remove('open');
+  document.getElementById('datePanel').classList.remove('open');
+  document.getElementById('attachToggle').classList.remove('on');
+  document.getElementById('dateToggle').classList.remove('on');
+  document.getElementById('addPanel').classList.remove('open');
+  renderHomework();
+};
+
+(async function init(){
+  loadSettings();
+  applySettings();
+  const t = realTodayIdx();
+  selectedScheduleDay = t>=0 ? t : 0;
+  renderHeader();
+  renderSchedule();
+  await loadHomework();
+  renderHomework();
+  document.getElementById('addToggle').classList.toggle('show', currentView==='hw');
+  setInterval(()=>{ if(currentView==='schedule'){ renderNowBanner(); renderSchedule(); } }, 30000);
+})();
+</script>
+</body>
+</html>
